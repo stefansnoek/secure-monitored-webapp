@@ -2,21 +2,23 @@ const { CosmosClient } = require("@azure/cosmos");
 const client = new CosmosClient(process.env.COSMOS_CONN_STRING);
 
 module.exports = async function (context, req) {
-  const data = req.body;
-  if (!data || !data.text) {
+  context.log("addMessage functie gestart");
+
+  if (!req.body || !req.body.text) {
     context.res = {
       status: 400,
-      body: "Verplicht veld: text"
+      body: "❗ 'text' is verplicht in JSON body"
     };
     return;
   }
 
   const item = {
     id: Date.now().toString(),
-    text: data.text
+    text: req.body.text
   };
 
   try {
+    context.log("Proberen te schrijven naar Cosmos...");
     const { resource } = await client
       .database("appdb")
       .container("messages")
@@ -27,10 +29,10 @@ module.exports = async function (context, req) {
       body: resource
     };
   } catch (err) {
-    context.log.error("Fout bij toevoegen:", err.message);
+    context.log.error("❌ Fout bij toevoegen:", err.message);
     context.res = {
       status: 500,
-      body: "Er is iets misgegaan"
+      body: "❌ Er is iets misgegaan: " + err.message
     };
   }
 };
