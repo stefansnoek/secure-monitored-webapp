@@ -21,10 +21,11 @@ function App() {
     try {
       await axios.post(`${API_BASE}/addMessage`, { text: input });
       setInput('');
-      setStatus('Message sent');
+      setStatus('✅ Bericht verstuurd!');
       fetchMessages();
-    } catch {
-      setStatus('Error');
+    } catch (error) {
+      console.error('❌ API error:', error.response?.data || error.message);
+      setStatus(`❌ Fout: ${error.response?.data || 'Onbekende fout'}`);
     }
   };
 
