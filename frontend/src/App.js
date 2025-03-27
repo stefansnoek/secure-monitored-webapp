@@ -1,23 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const API_BASE = '/api';
 
 function App() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [status, setStatus] = useState('');
+
+  const fetchMessages = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/getMessages`);
+      setMessages(res.data);
+    } catch {
+      setStatus('Error fetching data');
+    }
+  };
+
+  const submitMessage = async () => {
+    try {
+      await axios.post(`${API_BASE}/addMessage`, { text: input });
+      setInput('');
+      setStatus('Message sent');
+      fetchMessages();
+    } catch {
+      setStatus('Error');
+    }
+  };
+
+  useEffect(() => { fetchMessages(); }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ padding: '2rem' }}>
+      <h2> Azure Webapp Demo</h2>
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={submitMessage}>Send</button>
+      <p>{status}</p>
+      <h4> Messages:</h4>
+      <ul>{messages.map((m) => <li key={m.id}>{m.text}</li>)}</ul>
     </div>
   );
 }
